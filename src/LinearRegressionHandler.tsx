@@ -1,17 +1,13 @@
 import React from 'react';
-import { LinearRegressionView } from './LinearRegressionView'
-import { ChartLegendOrientation, ChartLegendPosition } from '@patternfly/react-charts';
+import { LinearRegressionView, Line } from './LinearRegressionView'
 import * as PMML from "./generated/www.dmg.org/PMML-4_4";
 
-interface Props {
-
+type Props = {
   model: PMML.RegressionModelType;
-
 }
 
-interface State {
+type State = {
 }
-
 
 class LinearRegressionHandler extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -19,12 +15,48 @@ class LinearRegressionHandler extends React.Component<Props, State> {
   }
 
   render() {
+    const modelName: string = this.props.model.modelName;
+    const regressionTable: PMML.RegressionTableType = this.getRegressionTable();
+    const c: number = regressionTable.intercept;
+
+    //We can only handle one NumericPredictor
+    const numbericPredictors: PMML.NumericPredictorType[] | undefined = regressionTable.NumericPredictor;
+    if (numbericPredictors === undefined) {
+      return (
+        <div>No NumericPredictorType</div>
+      );
+    }
+    if (numbericPredictors.length > 1) {
+      return (
+        <div>Too many NumericPredictorTypes</div>
+      );
+    }
+
+    const numbericPredictor: PMML.NumericPredictorType = numbericPredictors[0];
+    const line: Line = { m: numbericPredictor.coefficient, c: c, title: "base" };
+    const lines: Line[] = new Array<Line>(line);
+
+    //We need to duplicate the line for each CategoricalPredictor
+    const categoricalPredictors: PMML.CategoricalPredictorType[] | undefined = regressionTable.CategoricalPredictor;
+    if (categoricalPredictors !== undefined) {
+      categoricalPredictors.forEach(cp => {
+        lines.push({ m: line.m, c: line.c + cp.coefficient, title: line.title + " (" + cp.value + ")" });
+      });
+    }
+
     return (
       <div>
-        <LinearRegressionView m={1.0} c={1.0} legend={{ orientation: ChartLegendOrientation.vertical, position: ChartLegendPosition.right }} />
+        <LinearRegressionView modelName={modelName} lines={lines} />
       </div>
     );
   }
+
+  private getRegressionTable() {
+    const tables: PMML.RegressionTableType[] = this.props.model.RegressionTable;
+    const table: PMML.RegressionTableType = tables[0];
+    return table;
+  }
+
 }
 
 export default LinearRegressionHandler;

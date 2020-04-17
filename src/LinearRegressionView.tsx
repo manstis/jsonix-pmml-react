@@ -1,21 +1,21 @@
 import React from 'react';
-import { Chart, ChartAxis, ChartGroup, ChartLine, ChartVoronoiContainer, ChartLegendOrientation, ChartLegendPosition } from '@patternfly/react-charts';
+import { Chart, ChartAxis, ChartGroup, ChartLine, ChartVoronoiContainer } from '@patternfly/react-charts';
 
-type Legend = {
-    orientation?: ChartLegendOrientation;
-    position?: ChartLegendPosition;
+class Line {
+    //y=mx+c
+    m: number = 0;
+    c: number = 0;
+    title: string = "";
 }
 
-interface Props {
-
-    legend: Legend;
-
-    m:number;
-
-    c:number;
+type Props = {
+    modelName: string
+    width?: number
+    height?: number
+    lines: Line[]
 }
 
-interface State {
+type State = {
 }
 
 class LinearRegressionView extends React.Component<Props, State> {
@@ -23,43 +23,63 @@ class LinearRegressionView extends React.Component<Props, State> {
         super(props);
     }
 
+    private roundedToFixed(_float: number, _digits: number) {
+        var rounded = Math.pow(10, _digits);
+        return (Math.round(_float * rounded) / rounded).toFixed(_digits);
+    }
+
     render() {
+        const modelName: string = this.props.modelName;
+        const width: number = this.props.width === undefined ? 800 : this.props.width;
+        const height: number = this.props.height === undefined ? 800 : this.props.height;
+        const independentAxisTitle: string = "age";
+        const dependentAxisTitle: string = "number of claims";
+
+        const legendData: any = [];
+        this.props.lines.forEach(line => {
+            legendData.push({ name: line.title });
+        });
+
+        const minDomain: number = 0;
+        const maxDomain: number = Math.max(...this.props.lines.map(line => line.c)) * 2;
+
         return (
-            <div style={{ height: '250px', width: '600px' }}>
+            <div style={{ height: height, width: width }}>
                 <Chart
-                    ariaDesc="Average number of pets"
-                    ariaTitle="Line chart example"
+                    ariaTitle={modelName}
                     containerComponent={<ChartVoronoiContainer labels={({ datum }) => `${datum.name}: ${datum.y}`} constrainToVisibleArea />}
-                    legendData={[{ name: 'Cats' }]}
-                    legendOrientation={this.props.legend.orientation}
-                    legendPosition={this.props.legend.position}
-                    height={250}
-                    maxDomain={{ y: 10 }}
-                    minDomain={{ y: 0 }}
+                    legendData={legendData}
+                    legendOrientation="horizontal"
+                    legendPosition="bottom"
+                    maxDomain={{ y: maxDomain }}
+                    minDomain={{ y: minDomain }}
                     padding={{
-                        bottom: 50,
+                        bottom: 100,
                         left: 50,
-                        right: 200, // Adjusted to accommodate legend
+                        right: 50,
                         top: 50
                     }}
-                    width={600}
+                    height={height}
+                    width={width}
                 >
-                    <ChartAxis tickValues={[2, 3, 4]} />
-                    <ChartAxis dependentAxis showGrid tickValues={[2, 5, 8]} />
+                    <ChartAxis label={independentAxisTitle} showGrid tickValues={[-100, -50, 0, 50, 100]} />
+                    <ChartAxis label={dependentAxisTitle} dependentAxis showGrid tickValues={[0, maxDomain * 0.25, maxDomain * 0.5, maxDomain * 0.75, maxDomain]} tickFormat={(x) => this.roundedToFixed(x, 2)} />
                     <ChartGroup>
-                        <ChartLine
-                            data={[
-                                { name: 'Cats', x: '2015', y: 1 },
-                                { name: 'Cats', x: '2016', y: 2 },
-                                { name: 'Cats', x: '2017', y: 5 },
-                                { name: 'Cats', x: '2018', y: 3 }
-                            ]}
-                        />
+                        {this.props.lines.map((line) => {
+                            return <ChartLine
+                                data={[
+                                    { name: line.title, x: -100, y: -100 * line.m + line.c },
+                                    { name: line.title, x: 0, y: line.c },
+                                    { name: line.title, x: 100, y: 100 * line.m + line.c }
+                                ]}
+                            />
+                        })}
                     </ChartGroup>
                 </Chart>
             </div>
         )
     }
+
 }
 
-export { LinearRegressionView }
+export { LinearRegressionView, Line }
