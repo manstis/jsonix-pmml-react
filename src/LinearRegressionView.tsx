@@ -31,7 +31,8 @@ class LinearRegressionView extends React.Component<Props, State> {
     }
 
     private roundedTo50(_float: number): number {
-        return Math.round(_float / 50) * 50;
+        return _float;
+        //        return Math.round(_float / 50) * 50;
     }
 
     private getTicks(start: number, end: number, count: number): number[] {
@@ -41,6 +42,9 @@ class LinearRegressionView extends React.Component<Props, State> {
         while (v <= end) {
             ticks.push(v);
             v = v + step;
+        }
+        if (ticks[ticks.length - 1] !== end) {
+            ticks.push(end);
         }
         return ticks;
     }
@@ -69,7 +73,8 @@ class LinearRegressionView extends React.Component<Props, State> {
                     ariaTitle={modelName}
                     containerComponent={
                         <ChartVoronoiContainer
-                            labels={({ datum }) => `${this.roundedToFixed(datum.x, 2)}, ${this.roundedToFixed(datum.y, 2)}`} constrainToVisibleArea
+                            labels={({ datum }) => `${this.roundedToFixed(datum._x, 2)}, ${this.roundedToFixed(datum._y, 2)}`}
+                            constrainToVisibleArea
                         />}
                     legendData={legendData}
                     legendOrientation="horizontal"

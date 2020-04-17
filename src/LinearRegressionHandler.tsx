@@ -43,7 +43,11 @@ class LinearRegressionHandler extends React.Component<Props, State> {
     const categoricalPredictors: PMML.CategoricalPredictorType[] | undefined = regressionTable.CategoricalPredictor;
     if (categoricalPredictors !== undefined) {
       categoricalPredictors.forEach(cp => {
-        lines.push({ m: line.m, c: line.c + cp.coefficient, title: line.title + " (" + cp.value + ")" });
+        //cxml returns an array of CategoricalPredictorType with one element even if none are defined in the XML.
+        //This is a hack to check the coefficient is defined and is a number to filter the rogue elements.
+        if (!isNaN(cp.coefficient)) {
+          lines.push({ m: line.m, c: line.c + cp.coefficient, title: line.title + " (" + cp.value + ")" });
+        }
       });
     }
 
