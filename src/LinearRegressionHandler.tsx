@@ -19,6 +19,9 @@ class LinearRegressionHandler extends React.Component<Props, State> {
     const regressionTable: PMML.RegressionTableType = this.getRegressionTable();
     const c: number = regressionTable.intercept;
 
+    const miningSchema: PMML.MiningSchemaType = this.props.model.MiningSchema;
+    const dependentAxisTitle = miningSchema.MiningField.filter(mf => mf.usageType === "target")[0].name;
+
     //We can only handle one NumericPredictor
     const numbericPredictors: PMML.NumericPredictorType[] | undefined = regressionTable.NumericPredictor;
     if (numbericPredictors === undefined) {
@@ -46,7 +49,10 @@ class LinearRegressionHandler extends React.Component<Props, State> {
 
     return (
       <div>
-        <LinearRegressionView modelName={modelName} lines={lines} />
+        <LinearRegressionView modelName={modelName}
+          independentAxisTitle={numbericPredictor.name}
+          dependentAxisTitle={dependentAxisTitle}
+          lines={lines} />
       </div>
     );
   }

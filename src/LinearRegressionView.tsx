@@ -1,5 +1,5 @@
 import React from 'react';
-import { Chart, ChartAxis, ChartGroup, ChartLine, ChartVoronoiContainer } from '@patternfly/react-charts';
+import { Chart, ChartLabel, ChartAxis, ChartGroup, ChartLine, ChartVoronoiContainer } from '@patternfly/react-charts';
 
 class Line {
     //y=mx+c
@@ -10,6 +10,8 @@ class Line {
 
 type Props = {
     modelName: string
+    independentAxisTitle: string
+    dependentAxisTitle: string
     width?: number
     height?: number
     lines: Line[]
@@ -23,36 +25,55 @@ class LinearRegressionView extends React.Component<Props, State> {
         super(props);
     }
 
-    private roundedToFixed(_float: number, _digits: number) {
+    private roundedToFixed(_float: number, _digits: number): string {
         var rounded = Math.pow(10, _digits);
         return (Math.round(_float * rounded) / rounded).toFixed(_digits);
     }
 
+    private roundedTo50(_float: number): number {
+        return Math.round(_float / 50) * 50;
+    }
+
+    private getTicks(start: number, end: number, count: number): number[] {
+        const step: number = (end - start) / count;
+        const ticks: number[] = new Array<number>();
+        var v: number = start;
+        while (v <= end) {
+            ticks.push(v);
+            v = v + step;
+        }
+        return ticks;
+    }
+
     render() {
         const modelName: string = this.props.modelName;
-        const width: number = this.props.width === undefined ? 800 : this.props.width;
-        const height: number = this.props.height === undefined ? 800 : this.props.height;
-        const independentAxisTitle: string = "age";
-        const dependentAxisTitle: string = "number of claims";
+        const width: number = this.props.width === undefined ? 500 : this.props.width;
+        const height: number = this.props.height === undefined ? 500 : this.props.height;
 
         const legendData: any = [];
         this.props.lines.forEach(line => {
             legendData.push({ name: line.title });
         });
 
-        const minDomain: number = 0;
-        const maxDomain: number = Math.max(...this.props.lines.map(line => line.c)) * 2;
+        const maxIntersect: number = Math.max(...this.props.lines.map(line => line.c));
+        const maxDomainY: number = this.roundedTo50(maxIntersect * 2);
+        const minDomainY: number = -maxDomainY;
+
+        const minGradient: number = Math.min(...this.props.lines.map(line => line.m));
+        const maxDomainX: number = this.roundedTo50((maxDomainY - maxIntersect) / minGradient);
+        const minDomainX: number = -maxDomainX;
 
         return (
             <div style={{ height: height, width: width }}>
                 <Chart
                     ariaTitle={modelName}
-                    containerComponent={<ChartVoronoiContainer labels={({ datum }) => `${datum.name}: ${datum.y}`} constrainToVisibleArea />}
+                    containerComponent={
+                        <ChartVoronoiContainer
+                            labels={({ datum }) => `${this.roundedToFixed(datum.x, 2)}, ${this.roundedToFixed(datum.y, 2)}`} constrainToVisibleArea
+                        />}
                     legendData={legendData}
                     legendOrientation="horizontal"
                     legendPosition="bottom"
-                    maxDomain={{ y: maxDomain }}
-                    minDomain={{ y: minDomain }}
                     padding={{
                         bottom: 100,
                         left: 50,
@@ -62,16 +83,23 @@ class LinearRegressionView extends React.Component<Props, State> {
                     height={height}
                     width={width}
                 >
-                    <ChartAxis label={independentAxisTitle} showGrid tickValues={[-100, -50, 0, 50, 100]} />
-                    <ChartAxis label={dependentAxisTitle} dependentAxis showGrid tickValues={[0, maxDomain * 0.25, maxDomain * 0.5, maxDomain * 0.75, maxDomain]} tickFormat={(x) => this.roundedToFixed(x, 2)} />
+                    <ChartLabel text={modelName} x={width / 2} y={30} textAnchor="middle" />
+                    <ChartAxis
+                        label={this.props.independentAxisTitle} showGrid
+                        tickValues={this.getTicks(minDomainX, maxDomainX, 8)}
+                        tickFormat={(x) => this.roundedToFixed(x, 2)}
+                    />
+                    <ChartAxis
+                        label={this.props.dependentAxisTitle} dependentAxis showGrid
+                        tickValues={this.getTicks(minDomainY, maxDomainY, 8)}
+                        tickFormat={(x) => this.roundedToFixed(x, 2)}
+                    />
                     <ChartGroup>
                         {this.props.lines.map((line) => {
                             return <ChartLine
-                                data={[
-                                    { name: line.title, x: -100, y: -100 * line.m + line.c },
-                                    { name: line.title, x: 0, y: line.c },
-                                    { name: line.title, x: 100, y: 100 * line.m + line.c }
-                                ]}
+                                samples={100}
+                                domain={{ x: [minDomainX, maxDomainX], y: [minDomainY, maxDomainY] }}
+                                y={(datum: any) => line.m * datum.x + line.c}
                             />
                         })}
                     </ChartGroup>
