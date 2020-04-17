@@ -13,7 +13,6 @@
 
 # generated
 /cache
-/src/generated
 
 # misc
 .DS_Store

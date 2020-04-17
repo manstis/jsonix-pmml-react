@@ -20,7 +20,7 @@ function withJsonix(xml: string): Promise<any> {
  * @param xml
  */
 function withCXML(xml: string): Promise<PMML.document> {
-  var parser = new cxml.Parser;
+  var parser = new cxml.Parser();
   var result = parser.parse(xml, PMML.document);
 
   return result;

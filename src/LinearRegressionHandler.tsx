@@ -1,8 +1,11 @@
 import React from 'react';
 import { LinearRegressionView } from './LinearRegressionView'
 import { ChartLegendOrientation, ChartLegendPosition } from '@patternfly/react-charts';
+import * as PMML from "./generated/www.dmg.org/PMML-4_4";
 
 interface Props {
+
+  model: PMML.RegressionModelType;
 
 }
 

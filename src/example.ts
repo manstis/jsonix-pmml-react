@@ -1,6 +1,3 @@
-import { withJsonix, withCXML } from "./unmarshall/unmarshaller";
-import * as PMML from "./generated/www.dmg.org/PMML-4_4";
-
 const xml: string = "<PMML xmlns='http://www.dmg.org/PMML-4_4' version='4.4'> \
 <Header copyright='DMG.org'/> \
 <DataDictionary numberOfFields='4'> \
@@ -28,18 +25,4 @@ const xml: string = "<PMML xmlns='http://www.dmg.org/PMML-4_4' version='4.4'> \
 </RegressionModel> \
 </PMML>";
 
-//Un-typed marshalling
-const pmml = withJsonix(xml).then((doc: any) => {
-  console.log("With jsonix");
-  console.log("-----------");
-  console.log("Header=" + JSON.stringify(doc.value.header.c, null, " "));
-  console.log("RegressionModel=" + JSON.stringify(doc.value.anomalyDetectionModelOrAssociationModelOrBayesianNetworkModel[0], null, " "));
-});
-
-//Typed marshalling
-withCXML(xml).then((doc: PMML.document) => {
-  console.log("With CXML");
-  console.log("---------");
-  console.log("Header=" + JSON.stringify(doc.PMML.Header, null, " "));
-  console.log("RegressionModel=" + JSON.stringify(doc.PMML.RegressionModel, null, " "));
-});
+export default xml;

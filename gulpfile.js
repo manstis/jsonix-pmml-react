@@ -6,7 +6,6 @@ gulp.task("clean:output",
     return del([
       "build/",
       "coverage/",
-      "src/generated/",
       "cache"
     ]);
   });
