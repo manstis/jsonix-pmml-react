@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~ Copyright 2020 Red Hat, Inc. and/or its affiliates.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<jaxb:bindings
+	version="2.1"
+	xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+	xmlns:jsonix="http://jsonix.highsource.org/customizations"
+        xmlns:xsi="http://www.w3.org/2000/10/XMLSchema-instance"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	jaxb:extensionBindingPrefixes="jsonix">
+
+	<jaxb:bindings schemaLocation="pmml-4-4.xsd" node="/xs:schema">
+		<jaxb:schemaBindings>
+			<jaxb:package name="pmml"/>
+		</jaxb:schemaBindings>
+
+		<jsonix:mapping name="PMML" package="pmml"/>
+
+        <!-- rename the value element -->
+        <!-- <xs:element name="OutputField"> -->
+        <!--   <xs:complexType> -->
+        <!--     <xs:sequence> -->
+        <!--       <xs:element ref="Extension" minOccurs="0" maxOccurs="unbounded"/> -->
+        <!--       <xs:sequence minOccurs="0" maxOccurs="1"> -->
+        <!--       <xs:element ref="Decisions" minOccurs="0" maxOccurs="1"/> -->
+        <!--       <xs:group ref="EXPRESSION" minOccurs="1" maxOccurs="1"/> -->
+        <!--       <xs:element ref="Value" minOccurs="0" maxOccurs="unbounded"/> -->
+        <jaxb:bindings node="//xs:element[@name='OutputField']//xs:element[@ref='Value']">
+                <jaxb:property name="ValueAttribute"/>
+        </jaxb:bindings>
+
+	</jaxb:bindings>
+
+</jaxb:bindings>
